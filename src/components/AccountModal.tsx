@@ -1,0 +1,5 @@
+"use client";
+import React, { useState } from "react";
+import { KeyRound, LogOut, X } from "lucide-react";
+import type { Account } from "./AuthModal";
+export const AccountModal = ({ isOpen, account, onClose, onLogout }: { isOpen: boolean; account: Account | null; onClose: () => void; onLogout: () => void }) => { const [saved, setSaved] = useState(false); if (!isOpen || !account) return null; return <div className="modal-backdrop"><section className="account-modal" role="dialog" aria-modal="true"><button className="modal-close" onClick={onClose}><X size={18} /></button><p className="auth-kicker">Личный кабинет</p><h2>Здравствуйте, {account.name}.</h2><p className="account-email">{account.email}</p><div className="account-divider" /><h3>Сменить пароль</h3><input type="password" placeholder="Новый пароль" minLength={8} /><button className="form-primary" onClick={() => setSaved(true)}><KeyRound size={16} />{saved ? "Пароль обновлён" : "Обновить пароль"}</button><button className="logout-button" onClick={onLogout}><LogOut size={16} />Выйти из аккаунта</button></section></div> };

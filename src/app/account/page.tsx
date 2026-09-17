@@ -1,0 +1,6 @@
+"use client";
+import Link from "next/link";
+import { LogOut } from "lucide-react";
+import { useEffect, useState } from "react";
+import type { Account } from "@/components/AuthModal";
+export default function AccountPage(){const [account,setAccount]=useState<Account|null>(null);useEffect(()=>{try{setAccount(JSON.parse(sessionStorage.getItem("locus_account")||"null"))}catch{}},[]);const logout=()=>{sessionStorage.removeItem("locus_account");setAccount(null)};return <main data-theme="light" className="saved-page"><header className="site-header"><div className="shell nav-inner"><Link href="/" className="brand"><span className="brand-mark">L</span><span>locus</span></Link><nav className="nav-links"><Link href="/favorites">Избранное</Link><Link href="/compare">Сравнить</Link></nav></div></header><section className="shell account-page"><p className="section-label">Личный кабинет</p>{account?<><h1>Здравствуйте, {account.name}.</h1><p>{account.email}</p><div className="account-card"><h2>Безопасность</h2><input type="password" placeholder="Новый пароль"/><button>Обновить пароль</button><button className="logout-button" onClick={logout}><LogOut size={16}/>Выйти из аккаунта</button></div></>:<div className="empty-saved"><p>Войдите на главной странице, чтобы открыть кабинет.</p><Link href="/">На главную</Link></div>}</section></main>}
