@@ -12,6 +12,7 @@ import { ApiKeys } from "@/components/ApiSettingsModal";
 import { AuthModal, Account } from "@/components/AuthModal";
 import { AccountModal } from "@/components/AccountModal";
 import { CampusProfile, CampusImage, CategoryType, PipelineTelemetry } from "@/types/campus";
+import { RedditReviews } from "@/components/RedditReviews";
 
 export default function Home() {
   const [profile, setProfile] = useState<CampusProfile | null>(null);
@@ -192,10 +193,10 @@ export default function Home() {
       return false;
     }
     // 2. Trust Filter
-    if (trustFilter === "verified_only" && img.trustScore < 80) {
+    if (trustFilter === "verified_only" && img.trustScore < 75) {
       return false;
     }
-    if (trustFilter === "needs_check_only" && (img.trustScore >= 80 || img.trustScore < 50)) {
+    if (trustFilter === "needs_check_only" && img.trustScore >= 75) {
       return false;
     }
     return true;
@@ -212,7 +213,8 @@ export default function Home() {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(profile, null, 2));
     const downloadAnchor = document.createElement("a");
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `${profile.university.name.replace(/\s+/g, "_")}_campus_profile.json`);
+    const uniName = profile.university.universityName || profile.university.name || "campus";
+    downloadAnchor.setAttribute("download", `${uniName.replace(/\s+/g, "_")}_campus_profile.json`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
@@ -300,6 +302,11 @@ export default function Home() {
           <ImageGrid
             images={filteredImages}
             onSelectImage={(img) => setSelectedImage(img)}
+          />
+
+          {/* Student Reviews & Discussions from Reddit */}
+          <RedditReviews
+            universityName={profile.university.universityName || (profile.university as any).name || ""}
           />
         </>
       )}

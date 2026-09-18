@@ -57,9 +57,7 @@ export const ImageGrid: React.FC<ImageGridProps> = ({ images, onSelectImage }) =
             icon: Building,
           };
           const CatIcon = categoryMeta.icon;
-          const isVerified = img.trustScore >= 80;
-          const isNeedsCheck = img.trustScore >= 50 && img.trustScore < 80;
-          const isLow = img.trustScore < 50;
+          const isVerified = img.trustScore >= 75;
           const hasError = imageErrors[img.id];
 
           // Prefer the search thumbnail. If a source blocks hotlinking, never replace it
@@ -100,22 +98,15 @@ export const ImageGrid: React.FC<ImageGridProps> = ({ images, onSelectImage }) =
 
                 {/* Trust Score Badge */}
                 <div className="absolute top-3 right-3">
-                  {isVerified && (
+                  {isVerified ? (
                     <div className="image-trust-badge">
                       <ShieldCheck className="w-3.5 h-3.5" />
                       <span>{img.trustScore}% Проверено</span>
                     </div>
-                  )}
-                  {isNeedsCheck && (
+                  ) : (
                     <div className="image-trust-badge">
                       <AlertCircle className="w-3.5 h-3.5" />
                       <span>{img.trustScore}% Требует проверки</span>
-                    </div>
-                  )}
-                  {isLow && (
-                    <div className="image-trust-badge">
-                      <AlertCircle className="w-3.5 h-3.5" />
-                      <span>{img.trustScore}% Неподтверждено</span>
                     </div>
                   )}
                 </div>

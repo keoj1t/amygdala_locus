@@ -33,7 +33,29 @@ export const CityInsights: React.FC<CityInsightsProps> = ({ meta, isLoading }) =
     );
   }
 
-  const { dormitory, costOfLiving, transportAndLocation, city, country, currency } = meta;
+  const dormitory = meta.dormitory || {
+    guaranteeFirstYear: meta.dormitoryInfo?.guaranteedForFreshmen ?? true,
+    priceRange: meta.dormitoryInfo?.averageMonthlyCostKZT ? `${meta.dormitoryInfo.averageMonthlyCostKZT} ₸ / мес` : "$100-$300 / mo",
+    distanceToCampus: meta.dormitoryInfo?.distanceToCampus || "В шаговой доступности",
+    roomTypes: meta.dormitoryInfo?.roomTypes || ["1-местные", "2-местные"],
+  };
+
+  const costOfLiving = meta.costOfLiving || {
+    priceIndex: (meta.livingCostInfo?.overallCostIndex as any) || 'Moderate',
+    averageMealPrice: meta.livingCostInfo?.avgMealPrice ? `${meta.livingCostInfo.avgMealPrice} ${meta.livingCostInfo.currency || 'USD'}` : "$5-$10",
+    publicTransportTicket: meta.livingCostInfo?.publicTransportCost ? `${meta.livingCostInfo.publicTransportCost} ${meta.livingCostInfo.currency || 'USD'}` : "$1-$2",
+    rentNearCampus: meta.livingCostInfo?.dormPriceRange || "$300-$700 / mo",
+  };
+
+  const transportAndLocation = meta.transportAndLocation || {
+    walkScore: meta.transitInfo?.walkabilityScore || 85,
+    routesAndStops: meta.transitInfo?.closestMetroOrBus || "Автобусные маршруты и станции в шаговой доступности",
+    timeToAirportOrStation: meta.transitInfo?.airportTransitTime || "20-30 мин на общественном транспорте",
+  };
+
+  const city = meta.city || "Город";
+  const country = meta.country || "Страна";
+  const currency = meta.currency || meta.livingCostInfo?.currency || "USD";
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-8">

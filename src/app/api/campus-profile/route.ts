@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     });
 
     // STEP 5: Infrastructure Summary & Metrics Calculation
-    const { summary, keyHighlights, meta } = generateCampusSummary(trimmedName, verifiedImages);
+    const { summary, keyHighlights, meta } = await generateCampusSummary(trimmedName, verifiedImages);
 
     // Calculate metrics
     const totalImages = verifiedImages.length;

@@ -16,7 +16,7 @@ async function buildProfile(name: string, apiKeys?: any): Promise<CampusProfile>
     geminiApiKey: apiKeys?.geminiApiKey || process.env.GEMINI_API_KEY,
     openaiApiKey: apiKeys?.openaiApiKey || process.env.OPENAI_API_KEY
   });
-  const { summary, keyHighlights, meta } = generateCampusSummary(name, verifiedImages);
+  const { summary, keyHighlights, meta } = await generateCampusSummary(name, verifiedImages);
 
   const totalImages = verifiedImages.length;
   const avgTrustScore =
@@ -88,11 +88,14 @@ export async function POST(req: NextRequest) {
         ? "B"
         : "Tie";
 
+    const nameA = profileA.university.universityName || profileA.university.name || "Университет А";
+    const nameB = profileB.university.universityName || profileB.university.name || "Университет Б";
+
     let verdict = "";
     if (scoreDiff > 5) {
-      verdict = `${profileA.university.name} имеет более высокий уровень подтвержденных данных (+${scoreDiff}% Trust Score) и более подробную визуализацию кампуса.`;
+      verdict = `${nameA} имеет более высокий уровень подтвержденных данных (+${scoreDiff}% Trust Score) и более подробную визуализацию кампуса.`;
     } else if (scoreDiff < -5) {
-      verdict = `${profileB.university.name} лидирует по уровню доверия к источникам (+${Math.abs(scoreDiff)}% Trust Score).`;
+      verdict = `${nameB} лидирует по уровню доверия к источникам (+${Math.abs(scoreDiff)}% Trust Score).`;
     } else {
       verdict = `Оба университета демонстрируют сопоставимо высокое качество инфраструктуры и проверенную базу фотоматериалов.`;
     }
@@ -103,7 +106,7 @@ export async function POST(req: NextRequest) {
       scoreDifference: scoreDiff,
       dormComparison: {
         winner: dormWinner,
-        details: `${profileA.university.name}: ${profileA.categoryBreakdown.dorm || 0} фото общежитий vs ${profileB.university.name}: ${profileB.categoryBreakdown.dorm || 0} фото.`
+        details: `${nameA}: ${profileA.categoryBreakdown.dorm || 0} фото общежитий vs ${nameB}: ${profileB.categoryBreakdown.dorm || 0} фото.`
       },
       infraComparison: {
         winner: infraWinner,

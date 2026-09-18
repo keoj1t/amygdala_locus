@@ -216,7 +216,7 @@ async function searchSerperImages(
         sourceDomain: domain,
         publishDate: new Date().toISOString().split("T")[0],
         trustScore,
-        trustStatus: trustScore >= 80 ? "verified" : "needs_check",
+        trustStatus: trustScore >= 75 ? "verified" : "needs_check",
         width: item.imageWidth,
         height: item.imageHeight,
         aiReasoning: `Найдено в Google Images для "${universityName}". Источник: ${domain}.`
@@ -314,7 +314,8 @@ export async function executeParallelSearch(
   for (const [key, data] of Object.entries(KNOWN_UNIVERSITIES)) {
     if (
       key === normalizedKey ||
-      data.meta.name.toLowerCase() === universityName.toLowerCase() ||
+      (data.meta.name && data.meta.name.toLowerCase() === universityName.toLowerCase()) ||
+      (data.meta.universityName && data.meta.universityName.toLowerCase() === universityName.toLowerCase()) ||
       (data.meta.nativeName && data.meta.nativeName.toLowerCase() === universityName.toLowerCase())
     ) {
       if (!serperKey && !googleKey) {
@@ -364,7 +365,8 @@ export async function executeParallelSearch(
     if (
       key.includes(normalizedKey) ||
       normalizedKey.includes(key) ||
-      data.meta.name.toLowerCase().includes(universityName.toLowerCase())
+      Boolean(data.meta.name && data.meta.name.toLowerCase().includes(universityName.toLowerCase())) ||
+      Boolean(data.meta.universityName && data.meta.universityName.toLowerCase().includes(universityName.toLowerCase()))
     ) {
       return data.images;
     }

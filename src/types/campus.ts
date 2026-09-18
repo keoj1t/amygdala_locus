@@ -26,28 +26,50 @@ export interface CampusImage {
 }
 
 export interface UniversityMetrics {
-  universityName: string;
+  id?: string;
+  name?: string;
+  nativeName?: string;
+  universityName?: string;
   city: string;
   country: string;
-  currency: string;
+  currency?: string;
   foundedYear?: number;
   studentCount?: string;
   website?: string;
   logoUrl?: string;
   campusAcreage?: string;
-  dormitory: {
+  dormitoryInfo?: {
+    guaranteedForFreshmen: boolean;
+    averageMonthlyCostKZT?: number;
+    averageMonthlyCostUSD?: number;
+    roomTypes: string[];
+    distanceToCampus: string;
+  };
+  livingCostInfo?: {
+    currency: string;
+    avgMealPrice?: number;
+    dormPriceRange?: string;
+    publicTransportCost?: number;
+    overallCostIndex: string;
+  };
+  transitInfo?: {
+    closestMetroOrBus?: string;
+    walkabilityScore?: number;
+    airportTransitTime?: string;
+  };
+  dormitory?: {
     guaranteeFirstYear: boolean;
     priceRange: string;
     distanceToCampus: string;
     roomTypes: string[];
   };
-  costOfLiving: {
+  costOfLiving?: {
     priceIndex: 'Low' | 'Moderate' | 'High' | 'Very High';
     averageMealPrice: string;
     publicTransportTicket: string;
     rentNearCampus: string;
   };
-  transportAndLocation: {
+  transportAndLocation?: {
     walkScore: number;
     routesAndStops: string;
     timeToAirportOrStation: string;

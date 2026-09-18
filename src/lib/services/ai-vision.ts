@@ -65,7 +65,7 @@ URL изображения: "${image.url}"
     return {
       trustScore: score,
       category: parsed.category || image.category,
-      trustStatus: score >= 80 ? "verified" : score >= 50 ? "needs_check" : "unconfirmed",
+      trustStatus: score >= 75 ? "verified" : "needs_check",
       reasoning: parsed.reasoning || `Верифицировано через Gemini Flash для ${universityName}.`
     };
   } catch (err) {
@@ -127,7 +127,7 @@ URL: "${image.url}"
     return {
       trustScore: score,
       category: parsed.category || image.category,
-      trustStatus: score >= 80 ? "verified" : score >= 50 ? "needs_check" : "unconfirmed",
+      trustStatus: score >= 75 ? "verified" : "needs_check",
       reasoning: parsed.reasoning || `Верифицировано через GPT-4o-mini для ${universityName}.`
     };
   } catch (err) {
@@ -180,7 +180,7 @@ export function evaluateHeuristicTrust(
   score = Math.max(25, Math.min(99, score));
 
   const status: "verified" | "needs_check" | "unconfirmed" =
-    score >= 80 ? "verified" : score >= 50 ? "needs_check" : "unconfirmed";
+    score >= 75 ? "verified" : "needs_check";
 
   const reasoningText = image.aiReasoning || reasons.join(". ") || `Соответствует архитектурным параметрам ${universityName}.`;
 
