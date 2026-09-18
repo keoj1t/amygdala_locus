@@ -91,7 +91,11 @@ function extractUniversityKeywords(universityName: string): string[] {
   const words = clean.split(/\s+/).filter(w => w.length > 2);
   
   // Create acronym (e.g. "Czech Technical University in Prague" -> "ctu", "cvut")
-  const stopWords = new Set(["in", "of", "the", "and", "at", "for", "им", "в", "и", "по"]);
+  const stopWords = new Set([
+    "in", "of", "the", "and", "at", "for", "им", "в", "и", "по",
+    "university", "college", "school", "institute", "academy", "университет", "институт", 
+    "колледж", "академия", "университеті", "state", "national"
+  ]);
   const meaningfulWords = words.filter(w => !stopWords.has(w));
   const acronym = meaningfulWords.map(w => w[0]).join("");
 
@@ -140,7 +144,7 @@ export function validateAndFilterImage(
 
   // 3. Relevance check: must contain at least one meaningful keyword/acronym from university name
   const keywords = extractUniversityKeywords(universityName);
-  const hasKeywordMatch = keywords.some(kw => combined.includes(kw));
+  const hasKeywordMatch = keywords.length === 0 || keywords.some(kw => combined.includes(kw));
 
   if (!hasKeywordMatch) {
     return false;
@@ -214,7 +218,7 @@ async function searchSerperImages(
         category,
         sourceUrl,
         sourceDomain: domain,
-        publishDate: new Date().toISOString().split("T")[0],
+        publishDate: undefined,
         trustScore,
         trustStatus: trustScore >= 75 ? "verified" : "needs_check",
         width: item.imageWidth,
@@ -279,7 +283,7 @@ async function searchGoogleCustomSearch(
         category,
         sourceUrl,
         sourceDomain: domain,
-        publishDate: new Date().toISOString().split("T")[0],
+        publishDate: undefined,
         trustScore: 82,
         trustStatus: "verified",
         width: item.image?.width,
@@ -311,15 +315,16 @@ export async function executeParallelSearch(
 
   // 1. Check known verified database if offline or exact match
   const normalizedKey = universityName.toLowerCase().replace(/[^a-z0-9]/g, "-");
+  const exactNameSearch = universityName.trim().toLowerCase();
   for (const [key, data] of Object.entries(KNOWN_UNIVERSITIES)) {
     if (
       key === normalizedKey ||
-      (data.meta.name && data.meta.name.toLowerCase() === universityName.toLowerCase()) ||
-      (data.meta.universityName && data.meta.universityName.toLowerCase() === universityName.toLowerCase()) ||
-      (data.meta.nativeName && data.meta.nativeName.toLowerCase() === universityName.toLowerCase())
+      (data.meta.name && data.meta.name.toLowerCase() === exactNameSearch) ||
+      (data.meta.universityName && data.meta.universityName.toLowerCase() === exactNameSearch) ||
+      (data.meta.nativeName && data.meta.nativeName.toLowerCase() === exactNameSearch)
     ) {
       if (!serperKey && !googleKey) {
-        return data.images;
+        return data.images.filter(img => validateAndFilterImage(img, universityName));
       }
     }
   }
@@ -330,26 +335,28 @@ export async function executeParallelSearch(
 
     // 2.1 Serper.dev Google Images
     if (serperKey) {
-      for (const query of catQuery.queries) {
-        const batch = await searchSerperImages(query, catQuery.category, serperKey, universityName);
-        images.push(...batch);
-        if (images.length >= 3) break; // Have enough quality real photos for this category
-      }
+      const serperPromises = catQuery.queries.map(query => 
+        searchSerperImages(query, catQuery.category, serperKey, universityName)
+      );
+      const resultsSet = await Promise.all(serperPromises);
+      images.push(...resultsSet.flat());
     }
 
     // 2.2 Google Custom Search
     if (images.length === 0 && googleKey && googleCx) {
-      const gResults = await searchGoogleCustomSearch(
-        catQuery.queries[0],
-        catQuery.category,
-        googleKey,
-        googleCx,
-        universityName
+      const googlePromises = catQuery.queries.map(query => 
+        searchGoogleCustomSearch(query, catQuery.category, googleKey, googleCx, universityName)
       );
-      images.push(...gResults);
+      const googleResultsSet = await Promise.all(googlePromises);
+      images.push(...googleResultsSet.flat());
     }
 
-    return images;
+    // Local deduplication by URL
+    const unique = new Map<string, CampusImage>();
+    for (const img of images) {
+      if (!unique.has(img.url)) unique.set(img.url, img);
+    }
+    return Array.from(unique.values());
   });
 
   const nestedResults = await Promise.all(categoryPromises);
@@ -363,12 +370,12 @@ export async function executeParallelSearch(
   // If live search returned 0 (e.g. offline without API key), check known universities or return empty to allow AI pipeline fallback
   for (const [key, data] of Object.entries(KNOWN_UNIVERSITIES)) {
     if (
-      key.includes(normalizedKey) ||
-      normalizedKey.includes(key) ||
-      Boolean(data.meta.name && data.meta.name.toLowerCase().includes(universityName.toLowerCase())) ||
-      Boolean(data.meta.universityName && data.meta.universityName.toLowerCase().includes(universityName.toLowerCase()))
+      key === normalizedKey ||
+      (data.meta.name && data.meta.name.toLowerCase() === exactNameSearch) ||
+      (data.meta.universityName && data.meta.universityName.toLowerCase() === exactNameSearch) ||
+      (data.meta.nativeName && data.meta.nativeName.toLowerCase() === exactNameSearch)
     ) {
-      return data.images;
+      return data.images.filter(img => validateAndFilterImage(img, universityName));
     }
   }
 

@@ -5,6 +5,10 @@ import { verifyAndCategorizeImages } from "@/lib/services/ai-vision";
 import { generateCampusSummary } from "@/lib/services/summary";
 import { CampusProfile, CategoryType } from "@/types/campus";
 
+// Runtime LRU Cache configuration (TTL: 15 minutes)
+const profileCache = new Map<string, { data: CampusProfile; timestamp: number }>();
+const CACHE_TTL_MS = 15 * 60 * 1000;
+
 export async function POST(req: NextRequest) {
   const startTime = Date.now();
 
@@ -12,7 +16,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { universityName, apiKeys } = body;
 
-    if (!universityName || typeof universityName !== "string") {
+    if (!universityName || typeof universityName !== "string" || !universityName.trim()) {
       return NextResponse.json(
         { error: "Пожалуйста, укажите название университета." },
         { status: 400 }
@@ -20,6 +24,17 @@ export async function POST(req: NextRequest) {
     }
 
     const trimmedName = universityName.trim();
+    const cacheKey = trimmedName.toLowerCase();
+
+    // Check Runtime Cache
+    if (profileCache.has(cacheKey)) {
+      const cached = profileCache.get(cacheKey)!;
+      if (Date.now() - cached.timestamp < CACHE_TTL_MS) {
+        return NextResponse.json(cached.data);
+      } else {
+        profileCache.delete(cacheKey); // Expired
+      }
+    }
 
     // STEP 1 & 2: Query Expansion + Parallel Search Across All Categories
     const rawImages = await executeParallelSearch(trimmedName, {
@@ -65,6 +80,14 @@ export async function POST(req: NextRequest) {
 
     const executionTimeMs = Date.now() - startTime;
 
+    const hasLiveKeys = Boolean(
+      apiKeys?.googleApiKey || process.env.GOOGLE_SEARCH_API_KEY ||
+      apiKeys?.geminiApiKey || process.env.GEMINI_API_KEY ||
+      apiKeys?.openaiApiKey || process.env.OPENAI_API_KEY ||
+      apiKeys?.serperApiKey || process.env.SERPER_API_KEY ||
+      process.env.GROQ_API_KEY
+    );
+
     const profile: CampusProfile = {
       university: meta,
       summary,
@@ -75,8 +98,11 @@ export async function POST(req: NextRequest) {
       categoryBreakdown,
       generatedAt: new Date().toISOString(),
       executionTimeMs,
-      isMockData: !apiKeys?.googleApiKey && !apiKeys?.geminiApiKey && !apiKeys?.openaiApiKey
+      isMockData: !hasLiveKeys
     };
+
+    // Save to Cache
+    profileCache.set(cacheKey, { data: profile, timestamp: Date.now() });
 
     return NextResponse.json(profile);
   } catch (error: any) {

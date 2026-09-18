@@ -1,4 +1,4 @@
-import { chromium, type Browser } from 'playwright';
+import type { Browser } from 'playwright';
 
 export interface RedditReview {
   id: string;
@@ -145,15 +145,26 @@ export async function fetchRedditReviews(
     const query = `${cleanName} student review`;
     const searchUrl = `https://www.reddit.com/search/?q=${encodeURIComponent(query)}&sort=top`;
 
-    browser = await chromium.launch({
-      headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-blink-features=AutomationControlled',
-      ],
-    });
+    let chromium: any;
+    try {
+      const playwright = await import('playwright');
+      chromium = playwright.chromium;
+      
+      browser = await chromium.launch({
+        headless: true,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-blink-features=AutomationControlled',
+        ],
+      });
+    } catch (launchErr) {
+      console.warn('[RedditScraper] Playwright unavailable (serverless environment), falling back to AI.', launchErr);
+      throw new Error("Playwright unavailable");
+    }
+
+    if (!browser) throw new Error("Browser init failed");
 
     const context = await browser.newContext({
       userAgent:
