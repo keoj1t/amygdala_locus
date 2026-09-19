@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     const upstream = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
-      body: JSON.stringify({ model: "groq/compound-mini", temperature: 0.45, max_completion_tokens: 256, messages: [{ role: "system", content: system }, ...safeMessages] }),
+      body: JSON.stringify({ model: "compound-beta-mini", temperature: 0.45, max_completion_tokens: 256, messages: [{ role: "system", content: system }, ...safeMessages] }),
     });
     if (!upstream.ok) {
       const detail = await upstream.text();

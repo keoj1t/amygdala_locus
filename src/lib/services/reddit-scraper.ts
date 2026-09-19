@@ -296,11 +296,12 @@ export async function fetchRedditViaApify(
       const rawTitle = item.title || item.name || '';
       const rawUrl = item.url || item.permalink || (item.id ? `https://reddit.com/comments/${item.id}` : '');
       const permalink = rawUrl.startsWith('http') ? rawUrl : `https://reddit.com${rawUrl}`;
+      const title = cleanSnippetText(rawTitle, 200);
       const text = cleanSnippetText(item.body || item.selftext || item.text || '', 350);
       const subreddit = item.communityName?.replace(/^r\//, '') || item.subreddit?.replace(/^r\//, '') || 'college';
 
       const candidate = {
-        title: rawTitle,
+        title,
         text,
         subreddit,
       };
@@ -310,11 +311,11 @@ export async function fetchRedditViaApify(
         continue;
       }
 
-      if (!seenUrls.has(permalink) && rawTitle.length > 0) {
+      if (!seenUrls.has(permalink) && title.length > 0) {
         seenUrls.add(permalink);
         reviews.push({
           id: item.id || `apify-reddit-${idx}-${Date.now()}`,
-          title: rawTitle,
+          title,
           author: (item.author || item.userName || 'Reddit Student').replace(/^u\//, ''),
           score: typeof item.upVotes === 'number' ? item.upVotes : typeof item.score === 'number' ? item.score : 50,
           url: permalink,

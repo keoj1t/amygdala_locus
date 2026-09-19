@@ -572,7 +572,7 @@ export async function generateCampusSummary(
           Authorization: `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          model: "groq/compound-mini",
+          model: "compound-beta-mini",
           temperature: 0.4,
           max_completion_tokens: 800,
           response_format: { type: "json_object" },

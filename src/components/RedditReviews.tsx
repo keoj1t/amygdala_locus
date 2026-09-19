@@ -86,6 +86,18 @@ export const RedditReviews: React.FC<RedditReviewsProps> = ({ universityName }) 
     }
   };
 
+  const stripHtml = (str: string) =>
+    str
+      .replace(/<[^>]*>/g, " ")
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&#39;/g, "'")
+      .replace(/&quot;/g, '"')
+      .replace(/&nbsp;/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
   return (
     <section className="shell reddit-section my-12">
       <div className="reddit-container p-6 sm:p-9 rounded-3xl border border-[var(--line)] bg-[var(--paper)] shadow-sm">
@@ -222,7 +234,7 @@ export const RedditReviews: React.FC<RedditReviewsProps> = ({ universityName }) 
 
                   {/* Post Title */}
                   <h4 className="text-sm sm:text-base font-semibold text-[var(--ink)] leading-snug mb-2.5 group-hover:underline underline-offset-4 decoration-[var(--line)] transition-all">
-                    {review.title}
+                    {stripHtml(review.title)}
                   </h4>
 
                   {/* Post Quote / Body */}
@@ -230,7 +242,7 @@ export const RedditReviews: React.FC<RedditReviewsProps> = ({ universityName }) 
                     <div className="relative mt-2 mb-4 p-3.5 rounded-xl bg-[var(--paper)] border border-[var(--line)]/70">
                       <Quote className="w-3.5 h-3.5 text-[var(--muted)]/40 absolute top-2.5 left-2.5 -scale-x-100" />
                       <p className="text-xs text-[var(--muted)] line-clamp-4 leading-relaxed pl-3 italic">
-                        «{review.text}»
+                        «{stripHtml(review.text)}»
                       </p>
                     </div>
                   )}
