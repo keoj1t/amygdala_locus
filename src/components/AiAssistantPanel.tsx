@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, MessageCircle, Plus, Send, X, Bot } from "lucide-react";
+import { ChevronLeft, ChevronRight, MessageCircle, Plus, Send, X, Sparkles } from "lucide-react";
 
 type Msg = { role: "user" | "assistant"; text: string };
 type Chat = { id: string; title: string; messages: Msg[] };
@@ -146,31 +146,45 @@ export const AiAssistantPanel = () => {
         onClick={toggle}
         aria-label="Открыть AI-помощник"
       >
-        <div className="flex items-center justify-center">
-          {open ? <ChevronRight size={19} className="hidden sm:inline" /> : <ChevronLeft size={19} className="hidden sm:inline" />}
-          <MessageCircle size={18} />
+        <div className="flex items-center justify-center gap-1">
+          {open ? <ChevronRight size={18} className="hidden sm:inline" /> : <ChevronLeft size={18} className="hidden sm:inline" />}
+          <Sparkles size={18} className="text-[#8b5cf6] sm:text-inherit" />
         </div>
       </button>
 
+      {/* Backdrop for mobile & desktop when open */}
+      {open && (
+        <div
+          className="fixed inset-0 z-[78] bg-black/40 backdrop-blur-sm sm:backdrop-blur-none transition-opacity duration-300"
+          onClick={toggle}
+          aria-hidden="true"
+        />
+      )}
+
       {/* Drawer / Mobile Fullsheet Panel */}
-      <aside className={open ? "ai-panel open" : "ai-panel"}>
+      <aside className={open ? "ai-panel open" : "ai-panel"} aria-hidden={!open}>
         <div className="ai-head">
-          <div>
-            <small className="text-[10px] font-bold tracking-wider uppercase text-[var(--muted)]">AI Ассистент</small>
-            <h2 className="text-lg sm:text-xl font-bold text-[var(--ink)] m-0">Привет, {name}</h2>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#8b5cf6] to-[#6366f1] text-white flex items-center justify-center font-bold text-sm shadow-sm">
+              AI
+            </div>
+            <div>
+              <small className="text-[10px] font-bold tracking-wider uppercase text-[#8b5cf6]">AI Ассистент</small>
+              <h2 className="text-base sm:text-lg font-bold text-[var(--ink)] m-0 leading-tight">Привет, {name}</h2>
+            </div>
           </div>
           <div className="flex items-center gap-1.5">
             <button
               onClick={start}
               title="Новый диалог"
-              className="p-1.5 rounded-full hover:bg-[var(--soft)] text-[var(--ink)]"
+              className="p-1.5 rounded-full hover:bg-[var(--soft)] text-[var(--ink)] transition-colors"
             >
               <Plus size={18} />
             </button>
             <button
               onClick={toggle}
               title="Закрыть"
-              className="p-1.5 rounded-full hover:bg-[var(--soft)] text-[var(--ink)]"
+              className="p-1.5 rounded-full hover:bg-[var(--soft)] text-[var(--ink)] transition-colors"
             >
               <X size={18} />
             </button>
@@ -178,7 +192,7 @@ export const AiAssistantPanel = () => {
         </div>
 
         {history ? (
-          <div className="ai-history p-4 overflow-y-auto">
+          <div className="ai-history p-4 overflow-y-auto flex-1">
             <div className="flex items-center justify-between mb-3">
               <b className="text-sm font-semibold">История диалогов</b>
               <button
@@ -189,24 +203,28 @@ export const AiAssistantPanel = () => {
                 <span>Новый чат</span>
               </button>
             </div>
-            {chats.map((c) => (
-              <button
-                key={c.id}
-                className={`w-full p-3 rounded-xl text-left transition-colors mb-1.5 ${
-                  c.id === active ? "bg-[var(--soft)] font-semibold" : "hover:bg-[var(--soft)]/60"
-                }`}
-                onClick={() => {
-                  setActive(c.id);
-                  setDraft(null);
-                  setHistory(false);
-                }}
-              >
-                <div className="text-xs truncate text-[var(--ink)]">{c.title}</div>
-                <small className="text-[10px] text-[var(--muted)]">
-                  {c.messages.filter((m) => m.role === "user").length} сообщений
-                </small>
-              </button>
-            ))}
+            {chats.length === 0 ? (
+              <p className="text-xs text-[var(--muted)] text-center py-6">История диалогов пуста</p>
+            ) : (
+              chats.map((c) => (
+                <button
+                  key={c.id}
+                  className={`w-full p-3 rounded-xl text-left transition-colors mb-1.5 border border-transparent ${
+                    c.id === active ? "bg-[var(--soft)] font-semibold border-[var(--line)]" : "hover:bg-[var(--soft)]/60"
+                  }`}
+                  onClick={() => {
+                    setActive(c.id);
+                    setDraft(null);
+                    setHistory(false);
+                  }}
+                >
+                  <div className="text-xs truncate text-[var(--ink)]">{c.title}</div>
+                  <small className="text-[10px] text-[var(--muted)]">
+                    {c.messages.filter((m) => m.role === "user").length} сообщений
+                  </small>
+                </button>
+              ))
+            )}
           </div>
         ) : (
           <>
@@ -218,9 +236,9 @@ export const AiAssistantPanel = () => {
               ))}
               {loading && (
                 <div className="assistant ai-thinking flex gap-1 items-center p-3">
-                  <span className="w-2 h-2 rounded-full bg-[var(--ink)] animate-bounce" />
-                  <span className="w-2 h-2 rounded-full bg-[var(--ink)] animate-bounce [animation-delay:0.15s]" />
-                  <span className="w-2 h-2 rounded-full bg-[var(--ink)] animate-bounce [animation-delay:0.3s]" />
+                  <span className="w-2 h-2 rounded-full bg-[#8b5cf6] animate-bounce" />
+                  <span className="w-2 h-2 rounded-full bg-[#8b5cf6] animate-bounce [animation-delay:0.15s]" />
+                  <span className="w-2 h-2 rounded-full bg-[#8b5cf6] animate-bounce [animation-delay:0.3s]" />
                 </div>
               )}
             </div>
@@ -235,7 +253,7 @@ export const AiAssistantPanel = () => {
               <button
                 type="button"
                 onClick={() => setHistory(true)}
-                className="px-2.5 py-1.5 text-xs font-medium rounded-lg text-[var(--muted)] hover:text-[var(--ink)]"
+                className="px-2.5 py-1.5 text-xs font-medium rounded-lg text-[var(--muted)] hover:text-[var(--ink)] shrink-0 transition-colors"
               >
                 История
               </button>
@@ -243,12 +261,12 @@ export const AiAssistantPanel = () => {
                 ref={ref}
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
-                placeholder="Спросите о кампусе или общежитии..."
+                placeholder="Спросите о кампусе..."
               />
               <button
                 type="submit"
                 disabled={!value.trim() || loading}
-                className="p-2 rounded-xl bg-[var(--ink)] text-[var(--paper)] disabled:opacity-40"
+                className="p-2 rounded-xl bg-[var(--ink)] text-[var(--paper)] disabled:opacity-40 shrink-0 transition-opacity"
               >
                 <Send size={15} />
               </button>
