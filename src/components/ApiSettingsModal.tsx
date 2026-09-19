@@ -16,6 +16,7 @@ export interface ApiKeys {
   openaiApiKey?: string;
   googleApiKey?: string;
   googleCx?: string;
+  apifyApiKey?: string;
 }
 
 export const ApiSettingsModal: React.FC<ApiSettingsModalProps> = ({
@@ -49,6 +50,7 @@ export const ApiSettingsModal: React.FC<ApiSettingsModalProps> = ({
       openaiApiKey: "",
       googleApiKey: "",
       googleCx: "",
+      apifyApiKey: "",
     };
     setKeys(cleared);
     onSaveKeys(cleared);
@@ -68,7 +70,7 @@ export const ApiSettingsModal: React.FC<ApiSettingsModalProps> = ({
             <div>
               <h3 className="text-lg font-bold text-white">Настройки API и Режимов</h3>
               <p className="text-xs text-slate-400">
-                Подключение Serper.dev (Google Images), Gemini Vision и OpenAI
+                Подключение Serper.dev, Gemini Vision, Apify и OpenAI
               </p>
             </div>
           </div>
@@ -81,12 +83,25 @@ export const ApiSettingsModal: React.FC<ApiSettingsModalProps> = ({
         </div>
 
         {/* Body Form */}
-        <div className="p-6 space-y-4">
+        <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
           <div className="p-3.5 rounded-2xl bg-indigo-950/30 border border-indigo-500/30 text-xs text-indigo-200 flex items-start gap-2.5">
             <Info className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
             <span>
               Ключи Serper.dev и Gemini Vision активируют <strong>живой поиск реальных изображений</strong> любого ВУЗа по всему вебу за &lt; 30 секунд.
             </span>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              Apify API Token (Reddit Scraper trudax/reddit-scraper-lite):
+            </label>
+            <input
+              type="password"
+              value={keys.apifyApiKey || ""}
+              onChange={(e) => setKeys({ ...keys, apifyApiKey: e.target.value })}
+              placeholder="apify_api_..."
+              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-mono text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500"
+            />
           </div>
 
           <div>
