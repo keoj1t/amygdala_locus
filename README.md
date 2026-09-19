@@ -229,13 +229,10 @@ npm run dev
 | **Team Lead / Full-Stack Engineer** | Архитектура системы, Next.js App Router, разработка интерактивных компонентов, интеграция API, оптимизация задержек до <= 30 сек. |
 | **AI & Backend Engineer** | Разработка пайплайна Playwright скрапинга Reddit, интеграция Gemini Vision, алгоритмы расчета Trust Score и Structured JSON Mode. |
 | **Frontend & UI/UX Designer** | Дизайн-система Glassmorphism, верстка адаптивных карточек, анимации, микровзаимодействия и доступность интерфейса. |
+| **docummentation & Designer** | Дизайн-система презентации, документы, информационные файлы. |
+
 
 ---
 
-## 10. 📚 Источники и документация (References)
 
-* [Reddit Old Interface Documentation](https://old.reddit.com)
-* [Playwright for Node.js Documentation](https://playwright.dev/docs/intro)
-* [Google Gemini Multimodal Vision Docs](https://ai.google.dev/docs/gemini_api_overview)
-* [Next.js 14 Documentation](https://nextjs.org/docs)
 
